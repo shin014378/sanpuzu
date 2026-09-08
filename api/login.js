@@ -2,29 +2,37 @@ function same(left, right) {
   return String(left ?? "") === String(right ?? "") && String(left ?? "") !== "";
 }
 
-export default async function handler(request) {
+export default function handler(request, response) {
   if (request.method !== "POST") {
-    return new Response(null, { status: 405 });
+    response.status(405).end();
+    return;
   }
 
   const user = process.env.APP_USER;
   const password = process.env.APP_PASSWORD;
   const session = process.env.SESSION_SECRET;
   if (!user || !password || !session) {
-    return Response.json({ ok: false }, { status: 500 });
+    response.status(500).json({ ok: false });
+    return;
   }
 
-  const body = await request.json().catch(() => ({}));
+  let body = request.body || {};
+  if (typeof body === "string") {
+    try {
+      body = JSON.parse(body);
+    } catch {
+      body = {};
+    }
+  }
   if (!same(body.username, user) || !same(body.password, password)) {
-    return Response.json({ ok: false }, { status: 401 });
+    response.status(401).json({ ok: false });
+    return;
   }
 
   const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
-  return new Response(JSON.stringify({ ok: true }), {
-    status: 200,
-    headers: {
-      "content-type": "application/json",
-      "set-cookie": `sanpuzu_session=${encodeURIComponent(session)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=604800${secure}`,
-    },
-  });
+  response.setHeader(
+    "Set-Cookie",
+    `sanpuzu_session=${encodeURIComponent(session)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=604800${secure}`
+  );
+  response.status(200).json({ ok: true });
 }
