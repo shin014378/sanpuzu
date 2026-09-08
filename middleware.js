@@ -1,38 +1,17 @@
-import { NextResponse } from "next/server";
+const PUBLIC_PATHS = new Set(["/login.html", "/styles.css", "/api/login"]);
 
-const PUBLIC_PATHS = new Set([
-  "/login.html",
-  "/styles.css",
-  "/api/login",
-  "/favicon.ico",
-]);
-
-export async function middleware(request) {
-  const { pathname } = request.nextUrl;
-  if (
-    PUBLIC_PATHS.has(pathname) ||
-    pathname.startsWith("/_next/") ||
-    pathname.startsWith("/api/login")
-  ) {
-    return NextResponse.next();
+export default function middleware(request) {
+  const url = new URL(request.url);
+  if (PUBLIC_PATHS.has(url.pathname)) {
+    return;
   }
 
-  const cookie = request.cookies.get("sanpuzu_session")?.value;
-  const expected = process.env.SESSION_SECRET;
-  if (!expected || cookie !== expected) {
-    const login = request.nextUrl.clone();
-    login.pathname = "/login.html";
-    login.search = "";
-    return NextResponse.redirect(login);
+  const cookie = request.headers.get("cookie") || "";
+  const match = cookie.match(/(?:^|;\s*)sanpuzu_session=([^;]+)/);
+  const token = match ? decodeURIComponent(match[1]) : "";
+  if (token && token === process.env.SESSION_SECRET) {
+    return;
   }
 
-  if (pathname === "/") {
-    return NextResponse.rewrite(new URL("/index.html", request.url));
-  }
-
-  return NextResponse.next();
+  return Response.redirect(new URL("/login.html", request.url));
 }
-
-export const config = {
-  matcher: ["/((?!_next/static|_next/image).*)"],
-};

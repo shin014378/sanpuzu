@@ -7,3 +7,4 @@ verify*.png
 node_modules
 .next
 .vercel
+.env*
