@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>散布図メーカー</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">ブラウザだけで完結</p>
+          <h1>散布図メーカー</h1>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" class="ghost" id="load-sample">サンプルを見る</button>
+          <button type="button" class="primary" id="download-png" disabled>PNGで保存</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="panel">
+          <div class="tabs" role="tablist">
+            <button type="button" class="tab is-active" data-tab="file">ファイル</button>
+            <button type="button" class="tab" data-tab="paste">貼り付け</button>
+          </div>
+
+          <div class="tab-panel is-active" data-panel="file">
+            <label class="dropzone" id="dropzone">
+              <input type="file" id="file-input" accept=".csv,.tsv,.txt,.xlsx,.xls" hidden />
+              <strong>CSV / Excel をドロップ</strong>
+              <span>またはクリックして選択</span>
+            </label>
+          </div>
+
+          <div class="tab-panel" data-panel="paste">
+            <textarea
+              id="paste-input"
+              rows="8"
+              placeholder="Excelやスプレッドシートからコピーして、ここに貼り付けてください"
+            ></textarea>
+            <button type="button" class="secondary" id="parse-paste">この表で作図</button>
+          </div>
+
+          <p class="status" id="status">データを入れると、すぐ散布図になります。</p>
+
+          <div class="fields">
+            <label>
+              X軸
+              <select id="x-col"></select>
+            </label>
+            <label>
+              Y軸
+              <select id="y-col"></select>
+            </label>
+            <label>
+              色分け
+              <select id="group-col"></select>
+            </label>
+            <label>
+              点の名前
+              <select id="label-col"></select>
+            </label>
+            <label>
+              タイトル
+              <input type="text" id="chart-title" placeholder="例: 勉強時間と点数" />
+            </label>
+            <label>
+              X軸ラベル
+              <input type="text" id="x-label" />
+            </label>
+            <label>
+              Y軸ラベル
+              <input type="text" id="y-label" />
+            </label>
+            <label class="inline">
+              <input type="checkbox" id="trendline" checked />
+              回帰直線を表示
+            </label>
+            <label>
+              点の大きさ
+              <input type="range" id="point-size" min="4" max="16" value="7" />
+            </label>
+          </div>
+        </section>
+
+        <section class="chart-wrap">
+          <div class="chart-card">
+            <canvas id="chart"></canvas>
+            <div class="empty" id="empty">
+              左のパネルにデータを入れるか、<br />「サンプルを見る」で試せます。
+            </div>
+          </div>
+          <div class="stats" id="stats" hidden></div>
+          <div class="preview" id="preview" hidden></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
