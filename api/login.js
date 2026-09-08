@@ -7,30 +7,29 @@ function same(left, right) {
   return timingSafeEqual(a, b);
 }
 
-export default async function handler(request, response) {
+export default async function handler(request) {
   if (request.method !== "POST") {
-    response.status(405).end();
-    return;
+    return new Response(null, { status: 405 });
   }
 
   const user = process.env.APP_USER;
   const password = process.env.APP_PASSWORD;
   const session = process.env.SESSION_SECRET;
   if (!user || !password || !session) {
-    response.status(500).json({ ok: false });
-    return;
+    return Response.json({ ok: false }, { status: 500 });
   }
 
-  const body = request.body || {};
+  const body = await request.json().catch(() => ({}));
   if (!same(body.username, user) || !same(body.password, password)) {
-    response.status(401).json({ ok: false });
-    return;
+    return Response.json({ ok: false }, { status: 401 });
   }
 
   const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
-  response.setHeader(
-    "Set-Cookie",
-    `sanpuzu_session=${encodeURIComponent(session)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=604800${secure}`
-  );
-  response.status(200).json({ ok: true });
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: {
+      "content-type": "application/json",
+      "set-cookie": `sanpuzu_session=${encodeURIComponent(session)}; HttpOnly; Path=/; SameSite=Lax; Max-Age=604800${secure}`,
+    },
+  });
 }
