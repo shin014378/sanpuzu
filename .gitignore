@@ -4,3 +4,6 @@ Thumbs.db
 .env
 .env.*
 verify*.png
+node_modules
+.next
+.vercel

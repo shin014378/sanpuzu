@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ログイン | 散布図メーカー</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="login-shell">
+      <section class="login-card">
+        <p class="eyebrow">散布図メーカー</p>
+        <h1>ログイン</h1>
+        <p class="lead">授業用のページです。配布された ID とパスワードを入力してください。</p>
+        <form id="login-form">
+          <label>
+            ID
+            <input type="text" name="username" autocomplete="username" required />
+          </label>
+          <label>
+            パスワード
+            <input type="password" name="password" autocomplete="current-password" required />
+          </label>
+          <p class="status" id="login-status"></p>
+          <button type="submit" class="primary">入る</button>
+        </form>
+      </section>
+    </div>
+    <script>
+      const form = document.getElementById("login-form");
+      const status = document.getElementById("login-status");
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        status.textContent = "";
+        status.classList.remove("is-error");
+        const data = new FormData(form);
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: data.get("username"),
+            password: data.get("password"),
+          }),
+        });
+        if (response.ok) {
+          window.location.href = "/";
+          return;
+        }
+        status.textContent = "ID またはパスワードが違います。";
+        status.classList.add("is-error");
+      });
+    </script>
+  </body>
+</html>
